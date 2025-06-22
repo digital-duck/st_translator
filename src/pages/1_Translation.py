@@ -37,7 +37,7 @@ col_target_lang, col_source_lang, col_provider = st.columns(3)
 with col_provider:
     provider = st.selectbox(
         "Select Service Provider",
-        options=["DeepL", "Google Translate"],
+        options=["Google Translate", "DeepL", ],
         index=0  # DeepL as default
     )
 
