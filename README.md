@@ -53,11 +53,11 @@ DEEPL_AUTH_KEY=your-deepl-api-key
 ```
 
 3.2 Google Translate
-see `setup-google-cloud.md` for details
+see [setup-google-cloud.md](https://github.com/digital-duck/st_translator/blob/main/setup-google-cloud.md) for details
 
 
 3.2 Microsoft Translate
-see `setup-azure-cloud.md` for details
+see [setup-azure-cloud.md](https://github.com/digital-duck/st_translator/blob/main/setup-azure-cloud.md) for details
 
 
 4. Initialize the database
