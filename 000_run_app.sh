@@ -1,1 +1,0 @@
-PYTHONPATH=$PYTHONPATH:~/projects/digital-duck/st_translator streamlit run src/Home.py
