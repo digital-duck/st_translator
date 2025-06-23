@@ -21,14 +21,18 @@ db = TranslationDB()
 # --- Provider Selection and Initialization ---
 # Service provider and language selections
 # Place provider selection first, as it determines key requirements and translator init
-available_providers = ["DeepL", "Google Translate", "Microsoft Translator"]
+available_providers = [
+    "DeepL", 
+    "Google Translate", 
+    # "Microsoft Translator"
+]
 col_target_lang, col_source_lang, col_provider_selector = st.columns(3)
 
 with col_provider_selector:
     provider_name = st.selectbox(
         "Select Service Provider",
         options=available_providers,
-        index=0,  # Default to DeepL
+        index=available_providers.index("Google Translate"),  # Default to DeepL
         key="provider_select" # Add a key to help Streamlit manage state if needed
     )
 
@@ -53,21 +57,21 @@ try:
         # The GoogleTranslator class handles the credential path via os.environ or direct path
         translator = create_translator("Google Translate", credentials_path=GOOGLE_CREDENTIALS_PATH)
 
-    elif provider_name == "Microsoft Translator":
-        MS_TRANSLATOR_KEY = os.getenv('MS_TRANSLATOR_KEY')
-        MS_TRANSLATOR_REGION = os.getenv('MS_TRANSLATOR_REGION')
-        MS_TRANSLATOR_ENDPOINT = os.getenv('MS_TRANSLATOR_ENDPOINT', "https://api.cognitive.microsofttranslator.com/") # Default endpoint
+    # elif provider_name == "Microsoft Translator":
+    #     MS_TRANSLATOR_KEY = os.getenv('MS_TRANSLATOR_KEY')
+    #     MS_TRANSLATOR_REGION = os.getenv('MS_TRANSLATOR_REGION')
+    #     MS_TRANSLATOR_ENDPOINT = os.getenv('MS_TRANSLATOR_ENDPOINT', "https://api.cognitive.microsofttranslator.com/") # Default endpoint
 
-        if not MS_TRANSLATOR_KEY:
-            st.error("Microsoft Translator API key not found. Please set MS_TRANSLATOR_KEY in your .env file.")
-            st.stop()
-        if not MS_TRANSLATOR_REGION:
-            st.error("Microsoft Translator region not found. Please set MS_TRANSLATOR_REGION in your .env file.")
-            st.stop()
-        translator = create_translator("Microsoft Translator",
-                                       api_key=MS_TRANSLATOR_KEY,
-                                       region=MS_TRANSLATOR_REGION,
-                                       endpoint=MS_TRANSLATOR_ENDPOINT)
+    #     if not MS_TRANSLATOR_KEY:
+    #         st.error("Microsoft Translator API key not found. Please set MS_TRANSLATOR_KEY in your .env file.")
+    #         st.stop()
+    #     if not MS_TRANSLATOR_REGION:
+    #         st.error("Microsoft Translator region not found. Please set MS_TRANSLATOR_REGION in your .env file.")
+    #         st.stop()
+    #     translator = create_translator("Microsoft Translator",
+    #                                    api_key=MS_TRANSLATOR_KEY,
+    #                                    region=MS_TRANSLATOR_REGION,
+    #                                    endpoint=MS_TRANSLATOR_ENDPOINT)
     
     if translator:
         source_languages = translator.get_source_languages()

@@ -9,6 +9,8 @@ Follow these steps:
 1.  **Ensure you have a Google Cloud Platform (GCP) Project.**
     *   If you don't have one, go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project. You might be eligible for a free trial with credits.
 
+
+
 2.  **Enable the Cloud Translation API for your project.**
     *   In the Google Cloud Console, use the search bar at the top to find "Cloud Translation API".
     *   Navigate to the Cloud Translation API page and click "Enable".

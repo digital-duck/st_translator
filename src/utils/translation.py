@@ -2,8 +2,8 @@
 from abc import ABC, abstractmethod
 import deepl
 from google.cloud import translate_v2 as translate
-from azure.ai.translation.text import TextTranslationClient, TranslatorCredential
-from azure.core.exceptions import ServiceRequestError, ClientAuthenticationError
+# from azure.ai.translation.text import TextTranslationClient, TranslatorCredential
+# from azure.core.exceptions import ServiceRequestError, ClientAuthenticationError
 import os
 import requests # For Microsoft Translator language list
 from typing import Tuple, List, Dict, Optional
@@ -155,109 +155,109 @@ class GoogleTranslator(TranslationProvider):
         except Exception as e:
             raise TranslationError(f"Google: Translation failed: {str(e)}")
 
-class MicrosoftTranslator(TranslationProvider):
-    def __init__(self, api_key: str, region: str, endpoint: str = "https://api.cognitive.microsofttranslator.com/"):
-        """
-        Initializes the Microsoft Translator.
-        Requires API key and region. Endpoint is optional.
-        """
-        if not api_key:
-            raise TranslationError("Microsoft Translator: API key is required.")
-        if not region:
-            raise TranslationError("Microsoft Translator: Region is required.")
+# class MicrosoftTranslator(TranslationProvider):
+#     def __init__(self, api_key: str, region: str, endpoint: str = "https://api.cognitive.microsofttranslator.com/"):
+#         """
+#         Initializes the Microsoft Translator.
+#         Requires API key and region. Endpoint is optional.
+#         """
+#         if not api_key:
+#             raise TranslationError("Microsoft Translator: API key is required.")
+#         if not region:
+#             raise TranslationError("Microsoft Translator: Region is required.")
 
-        self.api_key = api_key
-        self.region = region
-        self.endpoint = endpoint
-        try:
-            credential = TranslatorCredential(self.api_key, self.region)
-            self.client = TextTranslationClient(endpoint=self.endpoint, credential=credential)
-            # Attempt a simple call to validate credentials somewhat (e.g., list languages)
-            self._get_ms_languages()
-        except ClientAuthenticationError as e:
-            raise TranslationError(f"Microsoft Translator: Authentication failed. Check API key and region. Details: {e}")
-        except ServiceRequestError as e:
-            raise TranslationError(f"Microsoft Translator: Service request error during initialization. Check endpoint and network. Details: {e}")
-        except Exception as e:
-            raise TranslationError(f"Microsoft Translator: Failed to initialize client: {e}")
+#         self.api_key = api_key
+#         self.region = region
+#         self.endpoint = endpoint
+#         try:
+#             credential = TranslatorCredential(self.api_key, self.region)
+#             self.client = TextTranslationClient(endpoint=self.endpoint, credential=credential)
+#             # Attempt a simple call to validate credentials somewhat (e.g., list languages)
+#             self._get_ms_languages()
+#         except ClientAuthenticationError as e:
+#             raise TranslationError(f"Microsoft Translator: Authentication failed. Check API key and region. Details: {e}")
+#         except ServiceRequestError as e:
+#             raise TranslationError(f"Microsoft Translator: Service request error during initialization. Check endpoint and network. Details: {e}")
+#         except Exception as e:
+#             raise TranslationError(f"Microsoft Translator: Failed to initialize client: {e}")
 
-    def _get_ms_languages(self, scope="translation") -> Dict:
-        """Helper to fetch languages from Microsoft Translator API."""
-        # The SDK does not have a direct method to list all languages with their names easily for v3.
-        # We use the REST API endpoint for this.
-        url = f"{self.endpoint.rstrip('/')}/languages?api-version=3.0&scope={scope}"
-        headers = {
-            'Accept-Language': 'en' # Get language names in English
-        }
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            raise TranslationError(f"Microsoft Translator: Error fetching languages from REST API: {e}")
+#     def _get_ms_languages(self, scope="translation") -> Dict:
+#         """Helper to fetch languages from Microsoft Translator API."""
+#         # The SDK does not have a direct method to list all languages with their names easily for v3.
+#         # We use the REST API endpoint for this.
+#         url = f"{self.endpoint.rstrip('/')}/languages?api-version=3.0&scope={scope}"
+#         headers = {
+#             'Accept-Language': 'en' # Get language names in English
+#         }
+#         try:
+#             response = requests.get(url, headers=headers, timeout=10)
+#             response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+#             return response.json()
+#         except requests.exceptions.RequestException as e:
+#             raise TranslationError(f"Microsoft Translator: Error fetching languages from REST API: {e}")
 
-    def get_source_languages(self) -> Dict[str, str]:
-        try:
-            languages_response = self._get_ms_languages()
-            # The response structure is like: {"translation": {"ar": {"name": "Arabic", "nativeName": "العربية", "dir": "rtl"}}}
-            return {code: data["name"] for code, data in languages_response.get("translation", {}).items()}
-        except Exception as e:
-            # Catching generic Exception as _get_ms_languages can raise TranslationError
-            raise TranslationError(f"Microsoft Translator: Error processing source languages: {str(e)}")
+#     def get_source_languages(self) -> Dict[str, str]:
+#         try:
+#             languages_response = self._get_ms_languages()
+#             # The response structure is like: {"translation": {"ar": {"name": "Arabic", "nativeName": "العربية", "dir": "rtl"}}}
+#             return {code: data["name"] for code, data in languages_response.get("translation", {}).items()}
+#         except Exception as e:
+#             # Catching generic Exception as _get_ms_languages can raise TranslationError
+#             raise TranslationError(f"Microsoft Translator: Error processing source languages: {str(e)}")
 
-    def get_target_languages(self) -> Dict[str, str]:
-        # For Microsoft Translator, source and target languages are generally the same.
-        return self.get_source_languages()
+#     def get_target_languages(self) -> Dict[str, str]:
+#         # For Microsoft Translator, source and target languages are generally the same.
+#         return self.get_source_languages()
 
-    def get_alternatives(self, text: str, target_lang: str, num_alternatives: int = 3) -> List[str]:
-        # Microsoft Translator API (v3) does not directly support multiple alternative translations
-        # in a single call in the same way DeepL does.
-        # The 'Translate' method returns only one primary translation.
-        return []
+#     def get_alternatives(self, text: str, target_lang: str, num_alternatives: int = 3) -> List[str]:
+#         # Microsoft Translator API (v3) does not directly support multiple alternative translations
+#         # in a single call in the same way DeepL does.
+#         # The 'Translate' method returns only one primary translation.
+#         return []
 
-    def translate(self, text: str, target_lang: str, source_lang: str = "auto") -> Tuple[str, str, str]:
-        try:
-            detected_language = source_lang
+#     def translate(self, text: str, target_lang: str, source_lang: str = "auto") -> Tuple[str, str, str]:
+#         try:
+#             detected_language = source_lang
 
-            if source_lang == "auto" or not source_lang:
-                # Perform detection if source_lang is 'auto'
-                detect_response = self.client.detect_language(content=[text])
-                if detect_response and len(detect_response) > 0 and detect_response[0].primary_language:
-                    detected_language = detect_response[0].primary_language.language_code
-                else:
-                    raise TranslationError("Microsoft Translator: Could not reliably detect source language.")
+#             if source_lang == "auto" or not source_lang:
+#                 # Perform detection if source_lang is 'auto'
+#                 detect_response = self.client.detect_language(content=[text])
+#                 if detect_response and len(detect_response) > 0 and detect_response[0].primary_language:
+#                     detected_language = detect_response[0].primary_language.language_code
+#                 else:
+#                     raise TranslationError("Microsoft Translator: Could not reliably detect source language.")
 
-            if not detected_language or detected_language == "auto": # Should not happen if detection worked
-                 raise TranslationError("Microsoft Translator: Invalid or undetected source language for translation.")
+#             if not detected_language or detected_language == "auto": # Should not happen if detection worked
+#                  raise TranslationError("Microsoft Translator: Invalid or undetected source language for translation.")
 
-            # Perform translation
-            # The SDK expects a list of strings for text_content
-            response = self.client.translate(
-                content=[text],
-                to_language=[target_lang],
-                from_language=detected_language if detected_language != "auto" else None
-            )
+#             # Perform translation
+#             # The SDK expects a list of strings for text_content
+#             response = self.client.translate(
+#                 content=[text],
+#                 to_language=[target_lang],
+#                 from_language=detected_language if detected_language != "auto" else None
+#             )
 
-            if response and len(response) > 0 and response[0].translations:
-                translated_text = response[0].translations[0].text
-                # The response also contains `detected_language_info` if `from_language` was not specified.
-                # We use our own `detected_language` from the separate call or input.
-                if response[0].detected_language_info and detected_language == "auto": # Update if auto was used and SDK detected
-                    detected_language = response[0].detected_language_info.language_code
+#             if response and len(response) > 0 and response[0].translations:
+#                 translated_text = response[0].translations[0].text
+#                 # The response also contains `detected_language_info` if `from_language` was not specified.
+#                 # We use our own `detected_language` from the separate call or input.
+#                 if response[0].detected_language_info and detected_language == "auto": # Update if auto was used and SDK detected
+#                     detected_language = response[0].detected_language_info.language_code
 
-            else:
-                raise TranslationError("Microsoft Translator: No translation returned from API.")
+#             else:
+#                 raise TranslationError("Microsoft Translator: No translation returned from API.")
 
-            alt_text = "Alternative translations not supported by Microsoft Translator."
+#             alt_text = "Alternative translations not supported by Microsoft Translator."
 
-            return translated_text, detected_language, alt_text
+#             return translated_text, detected_language, alt_text
 
-        except ClientAuthenticationError as e:
-            raise TranslationError(f"Microsoft Translator: Authentication failed during translation. Check API key and region. Details: {e}")
-        except ServiceRequestError as e:
-            raise TranslationError(f"Microsoft Translator: Service error during translation. Details: {e}")
-        except Exception as e:
-            raise TranslationError(f"Microsoft Translator: Translation failed: {str(e)}")
+#         except ClientAuthenticationError as e:
+#             raise TranslationError(f"Microsoft Translator: Authentication failed during translation. Check API key and region. Details: {e}")
+#         except ServiceRequestError as e:
+#             raise TranslationError(f"Microsoft Translator: Service error during translation. Details: {e}")
+#         except Exception as e:
+#             raise TranslationError(f"Microsoft Translator: Translation failed: {str(e)}")
 
 
 class TranslationError(Exception):
@@ -269,7 +269,7 @@ def create_translator(provider: str, **kwargs) -> TranslationProvider:
     providers = {
         "DeepL": DeepLTranslator,
         "Google Translate": GoogleTranslator, # Renaming for clarity in UI
-        "Microsoft Translator": MicrosoftTranslator,
+        # "Microsoft Translator": MicrosoftTranslator,
     }
     
     if provider not in providers:
